@@ -145,6 +145,9 @@ services:
         condition: service_healthy
       secondary-app:
         condition: service_healthy
+      frontend-app:
+        condition: service_started
+
     healthcheck:
       test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
       interval: 10s
