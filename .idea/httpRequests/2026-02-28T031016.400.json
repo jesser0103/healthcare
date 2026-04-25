@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "message": "Failed to create doctor",
+  "error": "E11000 duplicate key error collection: healthcare.doctors index: email_1 dup key: { email: \"dr.sarah@hospital.com\" }"
+}

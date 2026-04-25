@@ -1,0 +1,3 @@
+graph TB
+  U["Browser / React UI\nport 3001"] -->|HTTP /api| B["Backend API (Express)\nport 3000"]
+  B --> D[("MongoDB\nport 27017")]

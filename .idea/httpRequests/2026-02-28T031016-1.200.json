@@ -1,0 +1,62 @@
+{
+  "success": true,
+  "count": 2,
+  "data": [
+    {
+      "_id": "699fa3e7c35eaa9f731aa9a3",
+      "firstName": "jasser",
+      "lastName": "souissi",
+      "email": "jasser.souissi@enetcom.u-sfax.tn",
+      "phone": "23986414",
+      "specialization": "General Practice",
+      "licenseNumber": "1245",
+      "qualifications": [],
+      "status": "Active",
+      "availability": [],
+      "joinedDate": "2026-02-26T01:37:43.627Z",
+      "createdAt": "2026-02-26T01:37:43.627Z",
+      "updatedAt": "2026-02-26T01:37:43.627Z",
+      "__v": 0,
+      "fullName": "Dr. jasser souissi",
+      "id": "699fa3e7c35eaa9f731aa9a3"
+    },
+    {
+      "_id": "699fa36fc35eaa9f731aa959",
+      "firstName": "Sarah",
+      "lastName": "Johnson",
+      "email": "dr.sarah@hospital.com",
+      "phone": "+1234567890",
+      "specialization": "Cardiology",
+      "licenseNumber": "MD123456",
+      "yearsOfExperience": 10,
+      "qualifications": [
+        "MD",
+        "Board Certified in Cardiology"
+      ],
+      "availability": [
+        {
+          "day": "Monday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "_id": "699fa36fc35eaa9f731aa95a",
+          "id": "699fa36fc35eaa9f731aa95a"
+        },
+        {
+          "day": "Wednesday",
+          "startTime": "09:00",
+          "endTime": "17:00",
+          "_id": "699fa36fc35eaa9f731aa95b",
+          "id": "699fa36fc35eaa9f731aa95b"
+        }
+      ],
+      "consultationFee": 150,
+      "status": "Active",
+      "joinedDate": "2026-02-26T01:35:43.621Z",
+      "createdAt": "2026-02-26T01:35:43.629Z",
+      "updatedAt": "2026-02-26T01:35:43.629Z",
+      "__v": 0,
+      "fullName": "Dr. Sarah Johnson",
+      "id": "699fa36fc35eaa9f731aa959"
+    }
+  ]
+}

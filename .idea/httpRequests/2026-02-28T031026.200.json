@@ -1,0 +1,11 @@
+{
+  "success": true,
+  "message": "Login successful",
+  "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY5OWZhM2FkYzM1ZWFhOWY3MzFhYTk4NyIsInJvbGUiOiJwYXRpZW50IiwiaWF0IjoxNzcyMjQ0NjI2LCJleHAiOjE3NzI4NDk0MjZ9.1mYdrWxOZOCJG0BFTkyI2kso_E1sZ26eUG0tmhrod1U",
+  "user": {
+    "id": "699fa3adc35eaa9f731aa987",
+    "email": "jane.doe@email.com",
+    "role": "patient",
+    "patientProfile": "699fa3adc35eaa9f731aa985"
+  }
+}

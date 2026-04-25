@@ -1,0 +1,310 @@
+services:
+  # -------------------------
+  # Apps (two regions)
+  # -------------------------
+  primary-app:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      REGION: US-East-1
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo-primary:27017,mongo-secondary:27017/healthdb?replicaSet=rs0}
+      MONGO_READ_PREFERENCE: secondaryPreferred
+    networks:
+      - primary-network
+      - replication-net
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+      mongo-secondary:
+        condition: service_healthy
+      init-replica:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  secondary-app:
+    build:
+      context: ../backend
+      dockerfile: Dockerfile
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      REGION: EU-West-1
+      JWT_SECRET: ${JWT_SECRET:-dev-secret}
+      JWT_EXPIRE: ${JWT_EXPIRE:-7d}
+      MONGODB_URI: ${MONGODB_URI:-mongodb://mongo-primary:27017,mongo-secondary:27017/healthdb?replicaSet=rs0}
+      MONGO_READ_PREFERENCE: secondaryPreferred
+    networks:
+      - secondary-network
+      - replication-net
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+      mongo-secondary:
+        condition: service_healthy
+      init-replica:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1:3000/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  frontend-app:
+    build:
+      context: ../frontend
+      dockerfile: Dockerfile
+    networks:
+      - primary-network
+      - secondary-network
+    depends_on:
+      primary-app:
+        condition: service_healthy
+      secondary-app:
+        condition: service_healthy
+
+  # -------------------------
+  # MongoDB replica set (1 primary + 1 secondary + 1 arbiter)
+  # -------------------------
+  mongo-primary:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - replication-net
+    volumes:
+      - mongo_primary_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-secondary:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - replication-net
+    volumes:
+      - mongo_secondary_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  mongo-arbiter:
+    image: mongo:7
+    command: ["mongod", "--replSet", "rs0", "--bind_ip_all"]
+    networks:
+      - replication-net
+    volumes:
+      - mongo_arbiter_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand({ ping: 1 }).ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+
+  init-replica:
+    image: mongo:7
+    networks:
+      - replication-net
+    volumes:
+      - ./mongo/init-replica.sh:/scripts/init-replica.sh:ro
+    entrypoint: ["sh", "/scripts/init-replica.sh"]
+    depends_on:
+      mongo-primary:
+        condition: service_healthy
+      mongo-secondary:
+        condition: service_healthy
+      mongo-arbiter:
+        condition: service_healthy
+
+  # -------------------------
+  # Nginx reverse proxy with auto-failover
+  # -------------------------
+  nginx:
+    image: openresty/openresty:alpine
+    networks:
+      - primary-network
+      - secondary-network
+    ports:
+      - "8080:80"
+    volumes:
+      - ./nginx/nginx.conf:/usr/local/openresty/nginx/conf/nginx.conf:ro
+    depends_on:
+      primary-app:
+        condition: service_healthy
+      secondary-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # -------------------------
+  # Monitoring
+  # -------------------------
+  mongodb-exporter:
+    image: percona/mongodb_exporter:0.40
+    command:
+      - "--mongodb.uri=mongodb://mongo-primary:27017,mongo-secondary:27017/admin?replicaSet=rs0"
+      - "--web.listen-address=:9216"
+      - "--collect-all"
+      - "--compatible-mode"
+    networks:
+      - replication-net
+    depends_on:
+      init-replica:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "/mongodb_exporter", "--version"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    networks:
+      - replication-net
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    depends_on:
+      mongodb-exporter:
+        condition: service_healthy
+      primary-app:
+        condition: service_healthy
+      secondary-app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/bin/wget", "-qO-", "http://127.0.0.1:9090/-/healthy"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  grafana:
+    image: grafana/grafana:11.1.4
+    networks:
+      - replication-net
+    ports:
+      - "3001:3000"
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+      GF_AUTH_ANONYMOUS_ORG_ROLE: "Viewer"
+      GF_SECURITY_ALLOW_EMBEDDING: "true"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./grafana/provisioning/dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana/dashboards:/var/lib/grafana/dashboards:ro
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "/usr/bin/wget", "-qO-", "http://127.0.0.1:3000/api/health"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  # -------------------------
+  # DR Control Dashboard
+  # -------------------------
+  dashboard:
+    build:
+      context: ./dashboard
+      dockerfile: Dockerfile
+    networks:
+      - primary-network
+      - secondary-network
+      - replication-net
+    ports:
+      - "3005:3000"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - COMPOSE_PROJECT_NAME=dr
+
+  # -------------------------
+  # Object storage (MinIO) with cross-region sync
+  # -------------------------
+  minio-primary:
+    build:
+      context: ./minio
+      dockerfile: Dockerfile
+    environment:
+      MINIO_ROLE: primary
+      REGION: US-East-1
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-healthcare}
+      MINIO_PRIMARY_URL: http://minio-primary:9000
+      MINIO_SECONDARY_URL: http://minio-secondary:9000
+    networks:
+      - primary-network
+      - replication-net
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - minio_primary_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+  minio-secondary:
+    build:
+      context: ./minio
+      dockerfile: Dockerfile
+    environment:
+      MINIO_ROLE: secondary
+      REGION: EU-West-1
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER:-minioadmin}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD:-minioadmin}
+      MINIO_BUCKET: ${MINIO_BUCKET:-healthcare}
+      MINIO_PRIMARY_URL: http://minio-primary:9000
+      MINIO_SECONDARY_URL: http://minio-secondary:9000
+    networks:
+      - secondary-network
+      - replication-net
+    ports:
+      - "9100:9000"
+      - "9101:9001"
+    volumes:
+      - minio_secondary_data:/data
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "http://127.0.0.1:9000/minio/health/ready"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+
+networks:
+  primary-network:
+    name: primary-network
+  secondary-network:
+    name: secondary-network
+  replication-net:
+    name: replication-net
+
+volumes:
+  mongo_primary_data:
+  mongo_secondary_data:
+  mongo_arbiter_data:
+  grafana_data:
+  minio_primary_data:
+  minio_secondary_data:

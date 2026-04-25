@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "message": "Failed to create medical record",
+  "error": "Cast to ObjectId failed for value \"PATIENT_ID_HERE\" (type string) at path \"_id\" for model \"Patient\""
+}

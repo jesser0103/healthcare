@@ -1,0 +1,12 @@
+{
+  "email": "dr.smith@hospital.com",
+  "password": "doctor123",
+  "role": "doctor",
+  "profileData": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "phone": "1234567890",
+    "specialization": "Cardiology",
+    "licenseNumber": "LIC-123456"
+  }
+}

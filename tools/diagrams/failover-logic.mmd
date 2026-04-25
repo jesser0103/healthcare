@@ -1,0 +1,16 @@
+sequenceDiagram
+  autonumber
+  participant User
+  participant Nginx as "Nginx OpenResty"
+  participant Primary as "primary-app"
+  participant Secondary as "secondary-app"
+
+  loop every few seconds
+    Nginx->>Primary: GET /health
+    alt Primary healthy (HTTP 200)
+      Nginx-->>User: Route traffic to Primary
+    else Primary unhealthy (repeated failures)
+      Nginx-->>User: Route traffic to Secondary
+      Nginx->>Secondary: GET /health
+    end
+  end

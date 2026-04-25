@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "message": "Failed to create patient",
+  "error": "E11000 duplicate key error collection: healthcare.patients index: email_1 dup key: { email: \"john.doe@email.com\" }"
+}

@@ -1,0 +1,50 @@
+### ============================================
+### PRESCRIPTION TESTS
+### ============================================
+
+### 1. Create Prescription (REPLACE PATIENT_ID, DOCTOR_ID, and TOKEN)
+POST http://localhost:3000/api/prescriptions
+Authorization: Bearer YOUR_DOCTOR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "patient": "PATIENT_ID_HERE",
+  "doctor": "DOCTOR_ID_HERE",
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "genericName": "Lisinopril",
+      "dosage": "10mg",
+      "frequency": "Once daily",
+      "duration": "30 days",
+      "quantity": 30,
+      "instructions": "Take with food in the morning",
+      "refillsAllowed": 2
+    },
+    {
+      "name": "Aspirin",
+      "genericName": "Acetylsalicylic acid",
+      "dosage": "81mg",
+      "frequency": "Once daily",
+      "duration": "90 days",
+      "quantity": 90,
+      "instructions": "Take with water",
+      "refillsAllowed": 3
+    }
+  ],
+  "diagnosis": "Hypertension and Cardiovascular Disease Prevention",
+  "notes": "Patient should monitor blood pressure daily. Follow up in 1 month.",
+  "validUntil": "2026-04-15"
+}
+
+### 2. Get All Prescriptions
+GET http://localhost:3000/api/prescriptions
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 3. Get Prescription by ID
+GET http://localhost:3000/api/prescriptions/PRESCRIPTION_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 4. Get Patient's Prescriptions
+GET http://localhost:3000/api/prescriptions/patient/PATIENT_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE

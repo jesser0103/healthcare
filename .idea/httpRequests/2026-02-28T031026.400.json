@@ -1,0 +1,5 @@
+{
+  "success": false,
+  "message": "Registration failed",
+  "error": "E11000 duplicate key error collection: healthcare.doctors index: licenseNumber_1 dup key: { licenseNumber: \"MD123456\" }"
+}

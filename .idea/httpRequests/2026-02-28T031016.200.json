@@ -1,0 +1,23 @@
+{
+  "success": true,
+  "message": "Enhanced Healthcare Management System API",
+  "version": "2.0.0",
+  "features": [
+    "Authentication & Authorization",
+    "Prescription Management",
+    "Lab Tests",
+    "Billing & Invoicing",
+    "Notifications",
+    "File Uploads",
+    "Video Consultations",
+    "Patient Portal"
+  ],
+  "endpoints": {
+    "auth": "/api/auth",
+    "patients": "/api/patients",
+    "doctors": "/api/doctors",
+    "appointments": "/api/appointments",
+    "medicalRecords": "/api/medical-records",
+    "prescriptions": "/api/prescriptions"
+  }
+}

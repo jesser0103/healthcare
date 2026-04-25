@@ -1,0 +1,77 @@
+{
+  "uid": "dr-overview",
+  "title": "Multi-Region DR Overview",
+  "timezone": "browser",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "5s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Request rate per region (req/s)",
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (region) (rate(http_requests_total[1m]))",
+          "legendFormat": "{{region}}"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Error rate per region (5xx req/s)",
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 },
+      "targets": [
+        {
+          "expr": "sum by (region) (rate(http_requests_total{status_code=~\"5..\"}[1m]))",
+          "legendFormat": "{{region}}"
+        }
+      ]
+    },
+    {
+      "type": "stat",
+      "title": "Active region (traffic-driven)",
+      "gridPos": { "x": 0, "y": 8, "w": 6, "h": 5 },
+      "targets": [
+        {
+          "expr": "topk(1, sum by (region) (rate(http_requests_total[30s])))",
+          "legendFormat": "{{region}}"
+        }
+      ],
+      "options": { "reduceOptions": { "calcs": ["lastNotNull"], "values": false } }
+    },
+    {
+      "type": "timeseries",
+      "title": "MongoDB replication lag (seconds behind primary)",
+      "gridPos": { "x": 6, "y": 8, "w": 18, "h": 8 },
+      "targets": [
+        {
+          "expr": "mongodb_mongod_replset_member_replication_lag{state=\"SECONDARY\"}",
+          "legendFormat": "{{name}}"
+        }
+      ]
+    },
+    {
+      "type": "table",
+      "title": "MongoDB replica set members (state)",
+      "gridPos": { "x": 0, "y": 13, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "mongodb_members_state",
+          "format": "table"
+        }
+      ]
+    },
+    {
+      "type": "timeseries",
+      "title": "Active MongoDB connections",
+      "gridPos": { "x": 0, "y": 21, "w": 24, "h": 8 },
+      "targets": [
+        {
+          "expr": "mongodb_ss_connections{conn_type=~\"active|current\"}",
+          "legendFormat": "{{conn_type}}"
+        }
+      ]
+    }
+  ]
+}

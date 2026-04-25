@@ -1,0 +1,346 @@
+POST http://localhost:3000/api/auth/logout
+Authorization: Bearer YOUR_TOKEN_HERE
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+content-length: 0
+
+<> 2026-02-28T031027.401.json
+
+###
+
+POST http://localhost:3000/api/auth/forgotpassword
+Content-Type: application/json
+Content-Length: 38
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "dr.smith@hospital.com"
+}
+
+<> 2026-02-28T031027.404.json
+
+###
+
+PUT http://localhost:3000/api/auth/updatepassword
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+Content-Length: 71
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "currentPassword": "doctor123",
+  "newPassword": "newpassword123"
+}
+
+<> 2026-02-28T031026-2.401.json
+
+###
+
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer YOUR_TOKEN_HERE
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031026-1.401.json
+
+###
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+Content-Length: 63
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "jane.doe@email.com",
+  "password": "patient123"
+}
+
+<> 2026-02-28T031026.200.json
+
+###
+
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+Content-Length: 65
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "dr.smith@hospital.com",
+  "password": "doctor123"
+}
+
+<> 2026-02-28T031026.401.json
+
+###
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+Content-Length: 374
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "jane.doe@email.com",
+  "password": "patient123",
+  "role": "patient",
+  "profileData": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "dateOfBirth": "1990-05-15",
+    "gender": "Female",
+    "email": "jane.doe@email.com",
+    "phone": "+1234567891",
+    "bloodType": "O+",
+    "allergies": ["Penicillin"],
+    "chronicConditions": ["Hypertension"]
+  }
+}
+
+<> 2026-02-28T031026-1.400.json
+
+###
+
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+Content-Length: 350
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "email": "dr.smith@hospital.com",
+  "password": "doctor123",
+  "role": "doctor",
+  "profileData": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "dr.smith@hospital.com",
+    "phone": "+1234567890",
+    "specialization": "Cardiology",
+    "licenseNumber": "MD123456",
+    "yearsOfExperience": 10,
+    "consultationFee": 150
+  }
+}
+
+<> 2026-02-28T031026.400.json
+
+###
+
+GET http://localhost:3000/api/medical-records
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031020.200.json
+
+###
+
+POST http://localhost:3000/api/medical-records
+Content-Type: application/json
+Content-Length: 848
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "patient": "PATIENT_ID_HERE",
+  "doctor": "DOCTOR_ID_HERE",
+  "visitDate": "2026-02-10",
+  "visitType": "Consultation",
+  "chiefComplaint": "Chest pain and shortness of breath",
+  "symptoms": ["Chest pain", "Shortness of breath", "Fatigue"],
+  "vitalSigns": {
+    "bloodPressure": "140/90",
+    "heartRate": 85,
+    "temperature": 37.2,
+    "weight": 80,
+    "height": 175,
+    "respiratoryRate": 18,
+    "oxygenSaturation": 98
+  },
+  "diagnosis": "Mild hypertension",
+  "treatmentPlan": "Lifestyle modifications and medication adjustment",
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "20mg",
+      "frequency": "Once daily",
+      "duration": "30 days"
+    }
+  ],
+  "followUpRequired": true,
+  "followUpDate": "2026-03-10",
+  "doctorNotes": "Patient responding well to treatment. Continue monitoring blood pressure."
+}
+
+<> 2026-02-28T031019-2.400.json
+
+###
+
+GET http://localhost:3000/api/appointments/upcoming
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031019-3.200.json
+
+###
+
+GET http://localhost:3000/api/appointments
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031019-2.200.json
+
+###
+
+POST http://localhost:3000/api/appointments
+Content-Type: application/json
+Content-Length: 243
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "patient": "PATIENT_ID_HERE",
+  "doctor": "DOCTOR_ID_HERE",
+  "appointmentDate": "2026-02-15",
+  "startTime": "10:00",
+  "endTime": "10:30",
+  "appointmentType": "Consultation",
+  "reason": "Regular checkup and blood pressure monitoring"
+}
+
+<> 2026-02-28T031019-1.400.json
+
+###
+
+GET http://localhost:3000/api/patients/search?search=john
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031019-1.200.json
+
+###
+
+GET http://localhost:3000/api/patients
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031019.200.json
+
+###
+
+POST http://localhost:3000/api/patients
+Content-Type: application/json
+Content-Length: 541
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "dateOfBirth": "1985-06-15",
+  "gender": "Male",
+  "email": "john.doe@email.com",
+  "phone": "+1234567891",
+  "address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "USA"
+  },
+  "emergencyContact": {
+    "name": "Jane Doe",
+    "relationship": "Spouse",
+    "phone": "+1234567892"
+  },
+  "bloodType": "O+",
+  "allergies": ["Penicillin"],
+  "chronicConditions": ["Hypertension"],
+  "currentMedications": ["Lisinopril 10mg"]
+}
+
+<> 2026-02-28T031019.400.json
+
+###
+
+GET http://localhost:3000/api/doctors/specialization/Cardiology
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031017.200.json
+
+###
+
+GET http://localhost:3000/api/doctors
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031016-1.200.json
+
+###
+
+POST http://localhost:3000/api/doctors
+Content-Type: application/json
+Content-Length: 497
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+{
+  "firstName": "Sarah",
+  "lastName": "Johnson",
+  "email": "dr.sarah@hospital.com",
+  "phone": "+1234567890",
+  "specialization": "Cardiology",
+  "licenseNumber": "MD123456",
+  "yearsOfExperience": 10,
+  "qualifications": ["MD", "Board Certified in Cardiology"],
+  "availability": [
+    {
+      "day": "Monday",
+      "startTime": "09:00",
+      "endTime": "17:00"
+    },
+    {
+      "day": "Wednesday",
+      "startTime": "09:00",
+      "endTime": "17:00"
+    }
+  ],
+  "consultationFee": 150
+}
+
+<> 2026-02-28T031016.400.json
+
+###
+
+GET http://localhost:3000
+User-Agent: IntelliJ HTTP Client/WebStorm 2025.3.3
+Accept-Encoding: br, deflate, gzip, x-gzip
+Accept: */*
+
+<> 2026-02-28T031016.200.json
+
+###
+

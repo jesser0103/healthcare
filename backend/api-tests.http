@@ -1,0 +1,147 @@
+### HEALTHCARE API TESTS
+
+### Test home endpoint
+GET http://localhost:3000
+
+###
+
+### ==================== DOCTORS ====================
+
+### Create a doctor
+POST http://localhost:3000/api/doctors
+Content-Type: application/json
+
+{
+  "firstName": "Sarah",
+  "lastName": "Johnson",
+  "email": "dr.sarah@hospital.com",
+  "phone": "+1234567890",
+  "specialization": "Cardiology",
+  "licenseNumber": "MD123456",
+  "yearsOfExperience": 10,
+  "qualifications": ["MD", "Board Certified in Cardiology"],
+  "availability": [
+    {
+      "day": "Monday",
+      "startTime": "09:00",
+      "endTime": "17:00"
+    },
+    {
+      "day": "Wednesday",
+      "startTime": "09:00",
+      "endTime": "17:00"
+    }
+  ],
+  "consultationFee": 150
+}
+
+### Get all doctors
+GET http://localhost:3000/api/doctors
+
+### Get doctors by specialization
+GET http://localhost:3000/api/doctors/specialization/Cardiology
+
+###
+
+### ==================== PATIENTS ====================
+
+### Create a patient
+POST http://localhost:3000/api/patients
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "dateOfBirth": "1985-06-15",
+  "gender": "Male",
+  "email": "john.doe@email.com",
+  "phone": "+1234567891",
+  "address": {
+    "street": "123 Main St",
+    "city": "New York",
+    "state": "NY",
+    "zipCode": "10001",
+    "country": "USA"
+  },
+  "emergencyContact": {
+    "name": "Jane Doe",
+    "relationship": "Spouse",
+    "phone": "+1234567892"
+  },
+  "bloodType": "O+",
+  "allergies": ["Penicillin"],
+  "chronicConditions": ["Hypertension"],
+  "currentMedications": ["Lisinopril 10mg"]
+}
+
+### Get all patients
+GET http://localhost:3000/api/patients
+
+### Search patients
+GET http://localhost:3000/api/patients/search?search=john
+
+###
+
+### ==================== APPOINTMENTS ====================
+
+### Create an appointment (REPLACE PATIENT_ID and DOCTOR_ID with real IDs)
+POST http://localhost:3000/api/appointments
+Content-Type: application/json
+
+{
+  "patient": "PATIENT_ID_HERE",
+  "doctor": "DOCTOR_ID_HERE",
+  "appointmentDate": "2026-02-15",
+  "startTime": "10:00",
+  "endTime": "10:30",
+  "appointmentType": "Consultation",
+  "reason": "Regular checkup and blood pressure monitoring"
+}
+
+### Get all appointments
+GET http://localhost:3000/api/appointments
+
+### Get upcoming appointments
+GET http://localhost:3000/api/appointments/upcoming
+
+###
+
+### ==================== MEDICAL RECORDS ====================
+
+### Create a medical record (REPLACE PATIENT_ID and DOCTOR_ID)
+POST http://localhost:3000/api/medical-records
+Content-Type: application/json
+
+{
+  "patient": "PATIENT_ID_HERE",
+  "doctor": "DOCTOR_ID_HERE",
+  "visitDate": "2026-02-10",
+  "visitType": "Consultation",
+  "chiefComplaint": "Chest pain and shortness of breath",
+  "symptoms": ["Chest pain", "Shortness of breath", "Fatigue"],
+  "vitalSigns": {
+    "bloodPressure": "140/90",
+    "heartRate": 85,
+    "temperature": 37.2,
+    "weight": 80,
+    "height": 175,
+    "respiratoryRate": 18,
+    "oxygenSaturation": 98
+  },
+  "diagnosis": "Mild hypertension",
+  "treatmentPlan": "Lifestyle modifications and medication adjustment",
+  "medications": [
+    {
+      "name": "Lisinopril",
+      "dosage": "20mg",
+      "frequency": "Once daily",
+      "duration": "30 days"
+    }
+  ],
+  "followUpRequired": true,
+  "followUpDate": "2026-03-10",
+  "doctorNotes": "Patient responding well to treatment. Continue monitoring blood pressure."
+}
+
+### Get all medical records
+GET http://localhost:3000/api/medical-records

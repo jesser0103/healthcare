@@ -1,0 +1,45 @@
+{
+  "success": true,
+  "count": 1,
+  "data": [
+    {
+      "address": {
+        "street": "123 Main St",
+        "city": "New York",
+        "state": "NY",
+        "zipCode": "10001",
+        "country": "USA"
+      },
+      "emergencyContact": {
+        "name": "Jane Doe",
+        "relationship": "Spouse",
+        "phone": "+1234567892"
+      },
+      "_id": "699fa36fc35eaa9f731aa963",
+      "firstName": "John",
+      "lastName": "Doe",
+      "dateOfBirth": "1985-06-15T00:00:00.000Z",
+      "gender": "Male",
+      "email": "john.doe@email.com",
+      "phone": "+1234567891",
+      "bloodType": "O+",
+      "allergies": [
+        "Penicillin"
+      ],
+      "chronicConditions": [
+        "Hypertension"
+      ],
+      "currentMedications": [
+        "Lisinopril 10mg"
+      ],
+      "status": "Active",
+      "registeredDate": "2026-02-26T01:35:43.806Z",
+      "createdAt": "2026-02-26T01:35:43.808Z",
+      "updatedAt": "2026-02-26T01:35:43.808Z",
+      "__v": 0,
+      "fullName": "John Doe",
+      "age": 40,
+      "id": "699fa36fc35eaa9f731aa963"
+    }
+  ]
+}

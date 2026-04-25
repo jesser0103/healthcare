@@ -1,0 +1,88 @@
+### ============================================
+### AUTHENTICATION TESTS - Enhanced Healthcare System
+### ============================================
+
+### 1. Register a Doctor
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "dr.smith@hospital.com",
+  "password": "doctor123",
+  "role": "doctor",
+  "profileData": {
+    "firstName": "John",
+    "lastName": "Smith",
+    "email": "dr.smith@hospital.com",
+    "phone": "+1234567890",
+    "specialization": "Cardiology",
+    "licenseNumber": "MD123456",
+    "yearsOfExperience": 10,
+    "consultationFee": 150
+  }
+}
+
+### 2. Register a Patient
+POST http://localhost:3000/api/auth/register
+Content-Type: application/json
+
+{
+  "email": "jane.doe@email.com",
+  "password": "patient123",
+  "role": "patient",
+  "profileData": {
+    "firstName": "Jane",
+    "lastName": "Doe",
+    "dateOfBirth": "1990-05-15",
+    "gender": "Female",
+    "email": "jane.doe@email.com",
+    "phone": "+1234567891",
+    "bloodType": "O+",
+    "allergies": ["Penicillin"],
+    "chronicConditions": ["Hypertension"]
+  }
+}
+
+### 3. Login as Doctor
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "dr.smith@hospital.com",
+  "password": "doctor123"
+}
+
+### 4. Login as Patient  
+POST http://localhost:3000/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane.doe@email.com",
+  "password": "patient123"
+}
+
+### 5. Get Current User (REPLACE TOKEN)
+GET http://localhost:3000/api/auth/me
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### 6. Update Password
+PUT http://localhost:3000/api/auth/updatepassword
+Authorization: Bearer YOUR_TOKEN_HERE
+Content-Type: application/json
+
+{
+  "currentPassword": "doctor123",
+  "newPassword": "newpassword123"
+}
+
+### 7. Forgot Password
+POST http://localhost:3000/api/auth/forgotpassword
+Content-Type: application/json
+
+{
+  "email": "dr.smith@hospital.com"
+}
+
+### 8. Logout
+POST http://localhost:3000/api/auth/logout
+Authorization: Bearer YOUR_TOKEN_HERE
