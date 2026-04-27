@@ -564,11 +564,27 @@
   <script>
     (function() {
       var host = window.location.host;
-      var grafanaUrl = "http://localhost:3001";
-      if (host.indexOf("github.dev") !== -1) {
-        grafanaUrl = "https://" + host.replace("-3005.", "-3001.");
+      var grafanaUrl;
+
+      // Codespaces: host looks like "probable-telegram-r-3005.app.github.dev"
+      var csMatch = host.match(/^(.+)-3005\.(.+)$/);
+      if (csMatch) {
+        grafanaUrl = "https://" + csMatch[1] + "-3001." + csMatch[2];
+      } else {
+        grafanaUrl = "http://localhost:3001";
       }
-      document.getElementById("grafanaIframe").src = grafanaUrl + "/d/dr-overview/dr-overview?orgId=1&refresh=5s&kiosk";
+
+      var iframe = document.getElementById("grafanaIframe");
+      iframe.src = grafanaUrl + "/d/dr-overview/dr-overview?orgId=1&refresh=5s&kiosk";
+
+      // Show a helpful error if Grafana iframe fails (e.g. port not public)
+      iframe.addEventListener("error", function() {
+        iframe.style.display = "none";
+        var msg = document.createElement("div");
+        msg.style.cssText = "color:#ff6d6d;padding:20px;font-family:monospace;font-size:13px;";
+        msg.textContent = "⚠ Could not load Grafana. Make sure port 3001 is set to Public in the Codespaces Ports tab. URL: " + grafanaUrl;
+        iframe.parentNode.appendChild(msg);
+      });
     })();
   </script>
 

@@ -6,6 +6,18 @@ const Docker = require("dockerode");
 const PORT = Number(process.env.PORT || 3000);
 const COMPOSE_PROJECT = process.env.COMPOSE_PROJECT_NAME || "dr";
 
+// Codespaces public URL support
+// e.g. CODESPACE_NAME=probable-telegram-r, GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN=app.github.dev
+const CODESPACE_NAME = process.env.CODESPACE_NAME || "";
+const CS_DOMAIN = process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN || "app.github.dev";
+
+function publicUrl(port) {
+  if (CODESPACE_NAME) {
+    return `https://${CODESPACE_NAME}-${port}.${CS_DOMAIN}`;
+  }
+  return `http://localhost:${port}`;
+}
+
 const CHAOS_DEFAULT_INTERVAL_MS = Number(process.env.CHAOS_INTERVAL_MS || 180000);
 const CHAOS_DEFAULT_DOWNTIME_MS = Number(process.env.CHAOS_DOWNTIME_MS || 30000);
 
@@ -286,11 +298,11 @@ app.get("/api/status", async (_req, res) => {
     prometheus: ups,
     minio,
     links: {
-      nginxHealth: "http://localhost:8080/health",
-      prometheus: "http://localhost:9090",
-      grafana: "http://localhost:3001",
-      minioPrimary: "http://localhost:9000",
-      minioSecondary: "http://localhost:9100",
+      nginxHealth: publicUrl(8080) + "/health",
+      prometheus: publicUrl(9090),
+      grafana: publicUrl(3001),
+      minioPrimary: publicUrl(9000),
+      minioSecondary: publicUrl(9100),
     },
     chaos: chaosPublicState(),
     timestamp: new Date().toISOString(),
