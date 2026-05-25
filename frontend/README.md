@@ -44,7 +44,7 @@ Modern, responsive React frontend for the Healthcare Management System.
 
 ```bash
 # 1. Navigate to frontend directory
-cd healthcare-frontend
+cd frontend
 
 # 2. Install dependencies
 npm install

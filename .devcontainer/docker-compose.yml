@@ -1,0 +1,28 @@
+services:
+  workspace:
+    image: mcr.microsoft.com/devcontainers/javascript-node:20
+    volumes:
+      - ..:/workspaces/healthcare-complete:cached
+    command: sleep infinity
+    environment:
+      MONGODB_URI: mongodb://admin:password123@mongo:27017/myapp?authSource=admin
+      JWT_SECRET: dev-change-me
+      JWT_EXPIRE: 30d
+      NODE_ENV: development
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:7.0
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password123
+      MONGO_INITDB_DATABASE: myapp
+    volumes:
+      - mongodb_data:/data/db
+      - mongodb_config:/data/configdb
+
+volumes:
+  mongodb_data:
+  mongodb_config:

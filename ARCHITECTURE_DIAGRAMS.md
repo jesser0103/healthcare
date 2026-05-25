@@ -1,109 +1,109 @@
 # 🏥 Visual Architecture & Disaster Recovery Breakdown
 
-This document visually breaks down how traffic flows through your Healthcare Application and how the Disaster Recovery (DR) mechanisms automatically heal the system.
+This document visually breaks down how traffic flows through the Healthcare Application and how the Disaster Recovery (DR) mechanisms automatically heal the system.
+
+---
+
+## 📐 Full System Architecture Overview
+
+The following figure illustrates the complete system architecture, showing every containerized component and how they interconnect across the multi-region simulation.
+
+![System Architecture Overview](docs/images/system_architecture_overview.png)
+
+---
 
 ## 1. 🚦 End-to-End Traffic Flow
 
-When a doctor or patient uses the application, the traffic flows through a central load balancer (Nginx). Nginx acts as an API Gateway, serving the React UI directly and routing data requests (`/api`) to the backend apps.
+When a doctor or patient uses the application, the traffic flows through a central load balancer (Nginx/OpenResty). Nginx acts as an **API Gateway**, serving the React UI directly from the `frontend-app` container and routing all data requests (`/api`) to the backend Node.js instances.
 
-```mermaid
-flowchart TD
-    User([👨‍⚕️ User Browser]) -->|1. Gets UI (Port 8080)| Nginx{{🌐 Nginx API Gateway}}
-    User -->|2. Calls /api| Nginx
-    
-    Nginx -->|Serves React Code| React[🖥️ Dockerized Frontend]
+![End-to-End Traffic Flow](docs/images/01_traffic_flow.png)
 
-    subgraph "Simulated Multi-Region Compute"
-        Nginx -->|Routes API Traffic| App1[💻 Primary App\nNode.js]
-        Nginx -.->|Standby/Failover| App2[💻 Secondary App\nNode.js]
-    end
-
-    subgraph "High Availability Storage"
-        App1 --> MongoPrimary[(🗄️ MongoDB Primary)]
-        App2 --> MongoPrimary
-        App1 --> MinioPrimary[📁 MinIO Primary\nFile Storage]
-        App2 --> MinioPrimary
-    end
-```
+**Key points:**
+- **Port 8080** is the single entry point for all users
+- Nginx differentiates between UI requests (`/`) and API requests (`/api/*`)
+- The **Active-Passive** model means only one backend handles traffic at a time
+- Both apps connect to the same MongoDB Replica Set via the `replication-net` Docker network
 
 ---
 
 ## 2. 🗄️ Database Replication & Zero Data Loss
 
-To prevent data loss if a server crashes, MongoDB is deployed as a **Replica Set**. All writes go to the Primary, which instantly copies the data to the Secondary.
+To prevent data loss if a database server crashes, MongoDB is deployed as a **3-node Replica Set**. All writes go to the Primary node, which instantly replicates the data to the Secondary. The Arbiter participates in elections but stores no data.
 
-```mermaid
-flowchart LR
-    App[💻 Backend Node.js] -->|Reads & Writes| Primary[(👑 Primary Node\nmongo-primary)]
-    
-    subgraph "MongoDB Replica Set (rs0)"
-        Primary -->|Replicates Data| Secondary[(💾 Secondary Node\nmongo-secondary)]
-        Arbiter((⚖️ Arbiter Node\nNo Data)) -.->|Watches Health| Primary
-        Arbiter -.->|Watches Health| Secondary
-    end
-```
+![Database Replication](docs/images/02_db_replication.png)
+
+**Key points:**
+- **Oplog Replication**: MongoDB uses an operations log to replay writes on the Secondary in real-time
+- **Read Preference**: Apps use `secondaryPreferred`, allowing reads from the Secondary to reduce load on the Primary
+- **Arbiter**: A lightweight process that exists solely to break ties during elections (no storage overhead)
 
 ---
 
-## 3. 💥 Disaster Recovery: Database Failover (Election)
+## 3. 💥 Disaster Recovery: Database Failover (Automatic Election)
 
-If the `mongo-primary` container is killed by the Chaos Monkey (or a real server crash), the Node.js app temporarily loses connection. Within milliseconds, the remaining nodes vote to promote the Secondary to be the new Primary.
+If the `mongo-primary` container is killed (by the Chaos Monkey or a real crash), the Node.js apps temporarily lose their database connection. Within **milliseconds**, the surviving nodes hold an automatic election, and the Secondary is promoted to become the new Primary.
 
-```mermaid
-sequenceDiagram
-    participant Primary as 👑 Primary (Crashes)
-    participant Secondary as 💾 Secondary
-    participant Arbiter as ⚖️ Arbiter
-    participant App as 💻 Node.js App
+![Failover Overview](docs/images/failover_sequence_diagram.png)
 
-    Note over Primary: 💥 Primary server goes down!
-    App--xPrimary: Connection Lost
-    Secondary->>Arbiter: I lost contact with Primary. Start Election!
-    Arbiter->>Secondary: I vote for you!
-    Note over Secondary: Secondary gets majority votes (2/3)
-    Secondary-->>Secondary: Promoted to New Primary 👑
-    App->>Secondary: Reconnects automatically (Zero Data Loss)
-```
+![Database Failover Election Sequence](docs/images/03_db_failover.png)
+
+**Recovery Timeline:**
+
+| Phase | Duration |
+|-------|----------|
+| Failure detection (heartbeat timeout) | ~10 seconds |
+| Election & promotion | < 1 second |
+| App reconnection (Mongoose driver) | 2–5 seconds |
+| **Total RTO** | **< 15 seconds** |
 
 ---
 
-## 4. 🔀 Disaster Recovery: Application Failover
+## 4. 🔀 Disaster Recovery: Application-Level Failover
 
-If the entire Primary Region (the `primary-app` container) crashes, Nginx detects the failure via its health checks and instantly starts routing all backend API traffic to the `secondary-app`. The user never sees an error.
+If the entire `primary-app` container crashes, Nginx/OpenResty detects the failure via its built-in health checks and **instantly reroutes** all backend API traffic to the `secondary-app`. The user experience is uninterrupted — at most a single request may timeout.
 
-```mermaid
-flowchart TD
-    User([👨‍⚕️ User Browser]) --> Nginx{{🌐 Nginx}}
-    
-    subgraph "Compute Layer"
-        App1[💥 Primary App\nCRASHED]
-        App2[✅ Secondary App\nTakes Over]
-    end
+![Application Failover](docs/images/04_app_failover.png)
 
-    Nginx -.->|Health Check Fails| App1
-    Nginx ==>|Instantly Reroutes API Traffic| App2
-    App2 --> Database[(MongoDB)]
-```
+**How Nginx detects failure:**
+- OpenResty runs Lua-based active health checks every **10 seconds**
+- After **3 consecutive failures** (30s), the primary upstream is marked as `down`
+- Traffic automatically shifts to the secondary upstream
+- When the primary recovers, Nginx gradually restores it to the active pool
 
 ---
 
-## 5. 📊 The Observability Stack (Metrics)
+## 5. 📊 The Observability Stack (Metrics & Monitoring)
 
-How do you know the DR is working? The observability stack constantly scrapes data from the containers and creates visual graphs.
+How do you *prove* the DR is working? The observability stack continuously scrapes telemetry data from every container and presents it in real-time visual dashboards.
 
-```mermaid
-flowchart TD
-    subgraph "Data Sources (Your Apps)"
-        App1[Node.js App]
-        Nginx[Nginx]
-        Mongo[MongoDB Exporter]
-    end
+![Observability Stack](docs/images/05_observability.png)
 
-    Prometheus[(📉 Prometheus\nTime-Series DB)] -->|Scrapes Metrics every 10s| App1
-    Prometheus -->|Scrapes Metrics every 10s| Nginx
-    Prometheus -->|Scrapes Metrics every 10s| Mongo
+**Metrics collected include:**
 
-    Grafana[📊 Grafana Dashboard] -->|Queries| Prometheus
-    
-    Admin([👨‍💻 System Admin]) -->|Views| Grafana
-```
+| Category | Metrics |
+|----------|---------|
+| **Application** | HTTP request count, response latency (p50/p95/p99), active connections |
+| **MongoDB** | Replica set member state, oplog window, operations/sec, connections |
+| **Infrastructure** | Container up/down status, memory usage, CPU utilization |
+
+---
+
+## 6. 🐒 Chaos Engineering Loop (Chaos Monkey)
+
+The Chaos Monkey is a custom Node.js script built into the DR Dashboard that automates resilience testing by randomly disrupting infrastructure.
+
+![Chaos Monkey Loop](docs/images/06_chaos_monkey.png)
+
+---
+
+## 7. 🌐 Docker Network Isolation
+
+The DR environment uses **three isolated Docker networks** to simulate real multi-region network boundaries. This ensures services can only communicate with the components they're supposed to reach.
+
+![Docker Network Isolation](docs/images/07_network_isolation.png)
+
+> **Note**: Nginx and Frontend exist on both `primary-network` and `secondary-network`, while all database/monitoring services share `replication-net`. Services like `primary-app` bridge across `primary-network` and `replication-net` to reach MongoDB.
+
+---
+
+*Last updated: April 2026*
